@@ -65,6 +65,7 @@ export default function ServicesPage() {
               {s.image && (
                 <div className="service__media">
                   <Image
+                    quality={70}
                     src={s.image}
                     alt={`${s.title} na Fisiohaus`}
                     fill

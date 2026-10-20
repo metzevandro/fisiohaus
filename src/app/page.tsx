@@ -93,6 +93,7 @@ export default function Home() {
           </Reveal>
           <Reveal className="media" delay={0.1}>
             <Image
+              quality={70}
               src={images.clinic}
               alt="Recepção do Centro de Saúde Fisiohaus"
               fill

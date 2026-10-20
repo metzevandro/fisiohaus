@@ -17,6 +17,7 @@ export default function PageHero({ title, lead, image, imageAlt = "" }: Props) {
         {image && (
           <div className="ph-media">
             <Image
+              quality={70}
               src={image}
               alt={imageAlt}
               fill
