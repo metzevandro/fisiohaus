@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { gsap, ScrollTrigger, useGSAP, MOTION_OK } from "@/lib/gsap";
 import { nav, site } from "@/data/site";
 
 export default function Header() {
@@ -21,33 +20,21 @@ export default function Header() {
     };
   }, [open]);
 
-  useGSAP(
-    () => {
-      ScrollTrigger.create({
-        start: "top -12",
-        end: 99999,
-        toggleClass: { targets: root.current, className: "is-scrolled" },
-      });
-    },
-    { scope: root },
-  );
-
-  useGSAP(
-    () => {
-      if (!open) return;
-      const mm = gsap.matchMedia();
-      mm.add(MOTION_OK, () => {
-        gsap.from(".mobile-nav a", {
-          x: -28,
-          opacity: 0,
-          duration: 0.5,
-          stagger: 0.05,
-          ease: "power3.out",
-        });
-      });
-    },
-    { scope: root, dependencies: [open] },
-  );
+  useEffect(() => {
+    const el = root.current;
+    if (!el) return;
+    let scrolled = false;
+    const onScroll = () => {
+      const next = window.scrollY > 12;
+      if (next !== scrolled) {
+        scrolled = next;
+        el.classList.toggle("is-scrolled", next);
+      }
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);

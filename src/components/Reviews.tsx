@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Reveal from "@/components/Reveal";
 import { getReviews } from "@/lib/reviews";
 import { AVATAR_COUNT, type Review } from "@/data/reviews";
@@ -31,15 +32,24 @@ function Card({ r }: { r: Review }) {
   return (
     <figure className="review">
       <figcaption className="review__who">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={r.photo || avatarFor(r.author)}
-          alt=""
-          width={48}
-          height={48}
-          loading="lazy"
-          referrerPolicy="no-referrer"
-        />
+        {r.photo ? (
+          <Image
+            src={r.photo}
+            alt=""
+            width={48}
+            height={48}
+            sizes="48px"
+            className="review__photo"
+          />
+        ) : (
+          <img
+            src={avatarFor(r.author)}
+            alt=""
+            width={48}
+            height={48}
+            loading="lazy"
+          />
+        )}
         <span>
           <strong>{r.author}</strong>
           {r.when && <small>{r.when}</small>}
@@ -73,7 +83,9 @@ export default async function Reviews() {
               </span>
             </p>
           ) : (
-            <p>Avaliações de quem já passou pela Fisiohaus, direto do Google.</p>
+            <p>
+              Avaliações de quem já passou pela Fisiohaus, direto do Google.
+            </p>
           )}
         </Reveal>
         <Reveal className="reviews" stagger>

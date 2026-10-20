@@ -1,11 +1,25 @@
 import type { Metadata, Viewport } from "next";
-import "@fontsource-variable/bricolage-grotesque";
-import "@fontsource-variable/figtree";
+import localFont from "next/font/local";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import Motion from "@/components/Motion";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import { site } from "@/data/site";
+
+const bricolage = localFont({
+  src: "../../node_modules/@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-wght-normal.woff2",
+  weight: "200 800",
+  display: "swap",
+  variable: "--font-bricolage",
+});
+
+const figtree = localFont({
+  src: "../../node_modules/@fontsource-variable/figtree/files/figtree-latin-wght-normal.woff2",
+  weight: "300 900",
+  display: "swap",
+  variable: "--font-figtree",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
@@ -78,11 +92,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="pt-BR">
+    <html lang="pt-BR" className={`${bricolage.variable} ${figtree.variable}`}>
       <body>
+        <noscript>
+          <style>
+            {
+              "[data-reveal],[data-reveal]>*{opacity:1!important;transform:none!important}"
+            }
+          </style>
+        </noscript>
         <Header />
         <main>{children}</main>
         <Footer />
+        <Motion />
         <WhatsAppButton />
         <script
           type="application/ld+json"

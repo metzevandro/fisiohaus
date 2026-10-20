@@ -1,52 +1,72 @@
 "use client";
 
-import { useRef } from "react";
-import { gsap, useGSAP, MOTION_OK } from "@/lib/gsap";
+import { useEffect, useRef } from "react";
 
-/** Articulação do joelho: a flexão acompanha a rolagem e o ângulo é medido em tempo real. */
 export default function JointArm() {
   const root = useRef<HTMLDivElement>(null);
 
-  useGSAP(
-    () => {
-      const mm = gsap.matchMedia();
-      mm.add(MOTION_OK, () => {
-        const el = root.current;
-        if (!el) return;
-        const label = el.querySelector<SVGTextElement>(".joint-angle");
-        const angle = { v: 0 };
-        if (label) label.textContent = "0°";
+  useEffect(() => {
+    const el = root.current;
+    if (!el) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-        const tl = gsap.timeline({
-          scrollTrigger: {
-            trigger: el,
-            start: "top 80%",
-            end: "bottom 30%",
-            scrub: 0.6,
-          },
-        });
-        tl.to(".shin", { rotation: 80, svgOrigin: "100 100", ease: "none" }, 0)
-          .fromTo(
-            ".joint-arc",
-            { strokeDashoffset: 1 },
-            { strokeDashoffset: 0, ease: "none" },
-            0,
-          )
-          .to(
-            angle,
-            {
-              v: 80,
-              ease: "none",
-              onUpdate: () => {
-                if (label) label.textContent = `${Math.round(angle.v)}°`;
-              },
-            },
-            0,
-          );
-      });
-    },
-    { scope: root },
-  );
+    const shin = el.querySelector<SVGGElement>(".shin");
+    const arc = el.querySelector<SVGPathElement>(".joint-arc");
+    const label = el.querySelector<SVGTextElement>(".joint-angle");
+    if (!shin || !arc || !label) return;
+
+    let current = 0;
+    let target = 0;
+    let raf = 0;
+    let near = false;
+
+    const apply = () => {
+      shin.setAttribute("transform", `rotate(${80 * current} 100 100)`);
+      arc.style.strokeDashoffset = String(1 - current);
+      label.textContent = `${Math.round(80 * current)}°`;
+    };
+
+    const measure = () => {
+      const r = el.getBoundingClientRect();
+      const vh = window.innerHeight;
+      const p = (0.8 * vh - r.top) / (0.5 * vh + r.height);
+      target = Math.min(1, Math.max(0, p));
+    };
+
+    const loop = () => {
+      current += (target - current) * 0.15;
+      if (Math.abs(target - current) < 0.001) current = target;
+      apply();
+      raf = current === target ? 0 : requestAnimationFrame(loop);
+    };
+    const kick = () => {
+      if (!near) return;
+      measure();
+      if (!raf) raf = requestAnimationFrame(loop);
+    };
+
+    arc.style.strokeDashoffset = "1";
+    label.textContent = "0°";
+    shin.setAttribute("transform", "rotate(0 100 100)");
+
+    const io = new IntersectionObserver(
+      ([e]) => {
+        near = e.isIntersecting;
+        kick();
+      },
+      { rootMargin: "20% 0px" },
+    );
+    io.observe(el);
+    window.addEventListener("scroll", kick, { passive: true });
+    window.addEventListener("resize", kick);
+
+    return () => {
+      io.disconnect();
+      window.removeEventListener("scroll", kick);
+      window.removeEventListener("resize", kick);
+      cancelAnimationFrame(raf);
+    };
+  }, []);
 
   return (
     <div ref={root} className="motion-art">

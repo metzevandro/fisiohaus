@@ -22,7 +22,7 @@ type PlacesResponse = {
 /**
  * Busca as avaliações no Google Places API (New).
  * Requer GOOGLE_PLACES_API_KEY e GOOGLE_PLACE_ID no ambiente.
- * A API devolve no máximo 5 avaliações; o resultado fica em cache por 24h.
+ * A API devolve no máximo 5 avaliações; o resultado fica em cache por ~6 meses.
  */
 export async function getReviews(): Promise<ReviewsData> {
   const key = process.env.GOOGLE_PLACES_API_KEY;
@@ -37,7 +37,7 @@ export async function getReviews(): Promise<ReviewsData> {
             "X-Goog-Api-Key": key,
             "X-Goog-FieldMask": "rating,userRatingCount,reviews",
           },
-          next: { revalidate: 60 * 60 * 24 },
+          next: { revalidate: 60 * 60 * 24 * 182 },
         },
       );
       if (res.ok) {

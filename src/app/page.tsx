@@ -34,7 +34,7 @@ export default function Home() {
               </Link>
             </div>
           </div>
-          <div className="spine-stage">
+          <div className="spine-stage" data-play>
             <SpineHero />
           </div>
         </div>
